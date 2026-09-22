@@ -82,10 +82,11 @@ X_filt = pd.DataFrame([X_filt_dict])
 def load_models():
     # Menggunakan dummy estimator untuk simulasi UI jika file joblib belum dimuat
     try:
-        models = joblib.load("m3tb_dss_models.joblib")
-        return models["turbidity_model"], models["filtration_model"]
-    except:
-        return None, None
+    models = joblib.load("m3tb_dss_models.joblib")
+except Exception as e:
+    st.error("Model gagal dimuat.")
+    st.exception(e)
+    st.stop()
 
 turb_model, filt_model = load_models()
 
