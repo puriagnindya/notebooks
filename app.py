@@ -80,24 +80,19 @@ X_filt = pd.DataFrame([X_filt_dict])
 # ==============================================================================
 @st.cache_resource
 def load_models():
-    # Menggunakan dummy estimator untuk simulasi UI jika file joblib belum dimuat
     try:
-    models = joblib.load("m3tb_dss_models.joblib")
-except Exception as e:
-    st.error("Model gagal dimuat.")
-    st.exception(e)
-    st.stop()
+        models = joblib.load("m3tb_dss_models.joblib")
+        return models["turbidity_model"], models["filtration_model"]
+    except Exception as e:
+        st.error("Model gagal dimuat.")
+        st.exception(e)
+        st.stop()
 
 turb_model, filt_model = load_models()
 
-# Prediksi Output (Dengan fallback simulasi jika model fisik belum dimuat)
-if turb_model is not None and filt_model is not None:
-    pred_turb = float(turb_model.predict(X_turb)[0])
-    pred_filt = float(filt_model.predict(X_filt)[0])
-else:
-    # Simulasi estimasi visual jika joblib tidak ditemukan
-    pred_turb = max(2.0, turbidity_initial * 0.05 + 5.0)
-    pred_filt = 0.18
+# Prediksi output menggunakan model yang tersimpan
+pred_turb = float(turb_model.predict(X_turb)[0])
+pred_filt = float(filt_model.predict(X_filt)[0])
 
 removal_efficiency = max(0.0, min(100.0, ((turbidity_initial - pred_turb) / turbidity_initial) * 100.0))
 
